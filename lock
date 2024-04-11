@@ -1,0 +1,51 @@
+-- Lock-On Head Script
+-- This script locks the camera onto the nearest player's head when the Q key is pressed.
+
+local keyBind = Enum.KeyCode.Q
+
+-- Function to lock onto a player's head
+local function LockOnToHead(player)
+    -- Check if the player exists and has a character
+    if player and player.Character then
+        local character = player.Character
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        local head = character:FindFirstChild("Head")
+
+        -- Check if the player's character has a humanoid and a head
+        if humanoid and head then
+            -- Set camera focus to the player's head position
+            game.Workspace.CurrentCamera.CameraSubject = head
+        end
+    end
+end
+
+-- Function to find the nearest player
+local function FindNearestPlayer()
+    local nearestPlayer = nil
+    local shortestDistance = math.huge
+
+    for _, player in ipairs(game.Players:GetPlayers()) do
+        if player.Character and player.Character:FindFirstChild("Head") then
+            local distance = (player.Character.Head.Position - game.Workspace.CurrentCamera.CFrame.Position).magnitude
+            if distance < shortestDistance then
+                nearestPlayer = player
+                shortestDistance = distance
+            end
+        end
+    end
+
+    return nearestPlayer
+end
+
+-- Function to handle key bind input
+local function OnKeyPress(input, gameProcessedEvent)
+    if input.KeyCode == keyBind and not gameProcessedEvent then
+        local nearestPlayer = FindNearestPlayer()
+        if nearestPlayer then
+            LockOnToHead(nearestPlayer)
+        end
+    end
+end
+
+-- Connect the function to the input service
+game:GetService("UserInputService").InputBegan:Connect(OnKeyPress)
